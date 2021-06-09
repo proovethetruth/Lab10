@@ -1,0 +1,96 @@
+void init_vector(vector_t* v) {
+    v->arr = (char**)calloc(2, sizeof(char) * 2);
+    v->size = 0;
+    v->capacity = 2;
+}
+
+void destroy(vector_t* v) {
+    for (int i = 0; i < (int)v->size; i++)
+    {
+        if (v->arr[i] != NULL)
+            free(v->arr[i]);
+    }
+    v->size = 0;
+}
+
+void push_back(vector_t* str, char* word) {
+    char** tmp = NULL;
+    if (str->size == str->capacity)
+    {
+        str->capacity *= 2;
+        tmp = (char**)calloc(str->capacity, str->capacity * sizeof(char));
+        if (!tmp)
+        {
+            printf("\n\a ERROR: Can't allocate enough memory");
+            return;
+        }
+        for (int i = 0; i < (int)str->size; i++)
+        {
+            tmp[i] = str->arr[i];
+        }
+        str->arr = tmp;
+    }
+    //for (int i = 0; i < (int)str->size; i++)
+    //{
+    //    if (strcmp(str->arr[i], word) == 0)
+    //        return;
+    //}
+    str->arr[str->size] = word;
+    str->size++;
+}
+
+void print_vector(vector_t* str)
+{
+    if (str->size == 0)
+        return;
+    for (int i = 0; i < (int)str->size; i++)
+        printf("\n %d. %s", i + 1, str->arr[i]);
+}
+
+int parse(vector_t* str, char* filename) {
+    FILE* fp;
+    if (!(fp = fopen(filename, "r")))
+        return 0;
+
+    init_vector(str);
+
+    char* word;
+    while ((word = readWord(fp)) != NULL)
+        push_back(str, word);
+    return 1;
+}
+
+char* readWord(FILE* fp) {
+    char ch = 0;
+
+    while (!is_ch(ch))
+    {
+        ch = fgetc(fp);
+        if (ch == EOF || !ch)
+            return NULL;
+    }
+
+    int size = 1;
+    while (is_ch(ch))
+    {
+        if ((ch = fgetc(fp)) == EOF || !ch)
+            break;
+        size++;
+    }
+    fseek(fp, -(size * (int)sizeof(char)), 1);
+
+    if (ch != EOF || !ch)
+        size--;
+
+    char* word = (char*)calloc(size, sizeof(char) * size + 1);
+    if (!word)
+    {
+        printf("\n Allocation error.");
+        return NULL;
+    }
+    for (int i = 0; i < size; i++)
+        word[i] = fgetc(fp);
+    word[size] = '\0';
+
+    return word;
+}
