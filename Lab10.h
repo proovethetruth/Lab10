@@ -4,9 +4,12 @@
 
 #include <stdio.h>
 
-int isDelimiter(char ch);
+int is_ch(char ch);
+int ignore(char ch);
+int isKeyword(char* str);
+int validIdentifier(char* str);
 
-char* readWord(FILE* fp);
 void print_id(char* filename);
+char* readWord(FILE* fp);
 
 #endif // !LAB10_H
