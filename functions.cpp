@@ -6,6 +6,55 @@
 #include <string.h>
 #include <stdlib.h>
 
+void init_vector(vector_t* v) {
+    v->arr = (char**)calloc(2, sizeof(char) * 2);
+    v->size = 0;
+    v->capacity = 2;
+}
+
+void destroy(vector_t* v) {
+    for (int i = 0; i < (int)v->size; i++)
+    {
+        if (v->arr[i] != NULL)
+            free(v->arr[i]);
+    }
+    v->size = 0;
+}
+
+void push_back(vector_t* str, char* word) {
+    char** tmp = NULL;
+    if (str->size == str->capacity)
+    {
+        str->capacity *= 2;
+        tmp = (char**)calloc(str->capacity, str->capacity * sizeof(char));
+        if (!tmp)
+        {
+            printf("\n\a ERROR: Can't allocate enough memory");
+            return;
+        }
+        for (int i = 0; i < (int)str->size; i++)
+        {
+            tmp[i] = str->arr[i];
+        }
+        str->arr = tmp;
+    }
+    for (int i = 0; i < (int)str->size; i++)
+    {
+        if (strcmp(str->arr[i], word) == 0)
+            return;
+    }
+    str->arr[str->size] = word;
+    str->size++;
+}
+
+void print_vector(vector_t* str)
+{
+    if (str->size == 0)
+        return;
+    for (int i = 0; i < (int)str->size; i++)
+        printf("\n %d. %s", i + 1, str->arr[i]);
+}
+
 int is_ch(char ch)
 {
     return ((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z'));
@@ -55,7 +104,7 @@ int validIdentifier(char* str)
     return 1;
 }
 
-void print_id(char* filename)
+void print_id(vector_t* str, char* filename)
 {
     FILE* fp;
     if (!(fp = fopen(filename, "r")))
@@ -65,9 +114,8 @@ void print_id(char* filename)
     printf("\n Identifiers, parsed from \"%s\": ", filename);
     while ((word = readWord(fp)) != NULL)
     {
-        if(validIdentifier(word) && !isKeyword(word))
-            printf("\n\t%s", word);
-        free(word);
+        if (validIdentifier(word) && !isKeyword(word))
+            push_back(str, word);
     }
 }
 
