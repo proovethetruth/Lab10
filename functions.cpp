@@ -60,14 +60,17 @@ int is_ch(char ch)
     return ((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z'));
 }
 
-int ignore(char ch)
+int is_num(char ch)
+{
+    return (ch >= '0' && ch <= '9');
+}
+
+int isDelimiter(char ch)
 {
     if (ch == ' ' || ch == '+' || ch == '-' || ch == '*' ||
         ch == '/' || ch == ',' || ch == ';' || ch == '>' ||
         ch == '<' || ch == '=' || ch == '(' || ch == ')' ||
-        ch == '[' || ch == ']' || ch == '{' || ch == '}' ||
-        ch == '\n'|| ch == '!' || ch == '\''||
-        ch == '\\'|| ch == '|')
+        ch == '[' || ch == ']' || ch == '{' || ch == '}')
         return 1;
     return 0;
 }
@@ -94,14 +97,17 @@ int isKeyword(char* str)
 
 int validIdentifier(char* str)
 {
-    if (str[0] >= '0' && str[0] <= '9' || str[0] == '"')
+    if (is_num(str[0]))
         return 0;
-    for (int i = 0; str[i+1] != '\0'; i++)
+
+    if (isKeyword(str))
+        return 0;
+
+    for (int i = 0; str[i] != '\0'; i++)
     {
-        if (ignore(str[i]))
+        if(!is_ch(str[i]) && !is_num(str[i]) && str[i] != '_')
             return 0;
     }
-    return 1;
 }
 
 void print_id(vector_t* str, char* filename)
@@ -114,7 +120,7 @@ void print_id(vector_t* str, char* filename)
     printf("\n Identifiers, parsed from \"%s\": ", filename);
     while ((word = readWord(fp)) != NULL)
     {
-        if (validIdentifier(word) && !isKeyword(word))
+        if (validIdentifier(word))
             push_back(str, word);
     }
 }
@@ -122,7 +128,7 @@ void print_id(vector_t* str, char* filename)
 char* readWord(FILE* fp) {
     char ch = ' ';
 
-    while (ignore(ch))
+    while (isDelimiter(ch))
     {
         ch = fgetc(fp);
         if (ch == EOF || !ch)
@@ -130,17 +136,8 @@ char* readWord(FILE* fp) {
     }
 
     int size = 1;
-    while (!ignore(ch))
+    while (!isDelimiter(ch))
     {
-        if (ch == '"')
-        {
-            while (1)
-            {
-                size++;
-                if ((ch = fgetc(fp)) == EOF || !ch || ch == '"')
-                    break;
-            }
-        }
         if ((ch = fgetc(fp)) == EOF || !ch)
             break;
         size++;
@@ -162,4 +159,5 @@ char* readWord(FILE* fp) {
 
     return word;
 }
+
 
